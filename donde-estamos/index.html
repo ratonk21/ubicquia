@@ -1,0 +1,127 @@
+<!doctype html>
+<!-- ═══ ESTADO ═══
+herramienta : Municipios LATAM — Diseño A (grid con filtros)
+version     : v4 (anterior: v3) — hermano: Diseño B, muro
+motor       : groupByCountry · stats · initials · imgTag · flagTag · attachFallback — byte-idéntico v1→v4
+ultima      : 2026-10-03 · v4 wordmark con U mayúscula (Ubicquia) por pedido del usuario
+arquitectura: datos(M)→motor→render · single-file · sin localStorage · sin CDN de JS · sin enlaces
+marca       : Ubicquia (--ubi-*) · wordmark con U mayúscula (deroga el logo en minúsculas de la guía)
+verificacion: hopper — node --check + harness jsdom (20 piezas, 1 grid, 0 enlaces, filtros, fallback)
+imagenes    : Wikimedia Commons + 3 sitios municipales (Santa Elena, Padre Hurtado, Paysandú)
+no_tocar    : bloque M (misma fuente en ambos diseños)
+pendientes  : export PNG del mural · orden manual · versión bilingüe
+═══ -->
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Municipios LATAM · grid</title>
+<meta name="description" content="Grid de emblemas municipales LATAM con bandera por país.">
+<style>
+:root{--ubi-navy:#1E2445;--ubi-blue:#22B0E1;--ubi-gray:#EEF0F5;--ubi-deep:#464D63;--ubi-gray2:#99A0B4;--ubi-lime:#AECC53;--ubi-surface:#fff;--ubi-line:rgba(30,36,69,.10);--ubi-pad:clamp(16px,5vw,48px)}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:Lato,"Helvetica Neue",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ubi-deep);background:var(--ubi-gray)}
+.band{width:100%}.band--navy{background:var(--ubi-navy);color:#fff}
+.container{width:100%;max-width:1200px;margin-inline:auto;padding-inline:var(--ubi-pad)}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:clamp(14px,2.4vh,20px)}
+.wm{font-weight:900;font-size:19px;letter-spacing:-.4px}.wm b{color:var(--ubi-blue)}.wm sup{font-size:9px;opacity:.75}
+.top h1{margin:0;font-size:13.5px;font-weight:700;opacity:.85}.sp{flex:1}
+.pill{font-size:12px;font-weight:800;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);padding:6px 12px;border-radius:999px}
+.btn{font:inherit;font-size:12px;font-weight:800;color:#fff;background:var(--ubi-blue);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.ctrl{background:var(--ubi-surface);border-bottom:1px solid var(--ubi-line);position:sticky;top:0;z-index:5}
+.ctrl .container{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-block:12px}
+#q{flex:1 1 220px;min-width:180px;font:inherit;font-size:13px;border:1px solid var(--ubi-line);border-radius:9px;padding:9px 12px;color:var(--ubi-navy);background:#fff}
+#q:focus{outline:2px solid var(--ubi-blue);outline-offset:-1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:11.5px;font-weight:800;color:var(--ubi-deep);background:#fff;border:1px solid var(--ubi-line);border-radius:999px;padding:6px 11px;cursor:pointer}
+.chip img{width:16px;height:11px;object-fit:cover;border-radius:2px}
+.chip .flfb{width:16px;height:11px;font-size:7px}
+.chip.on{background:var(--ubi-navy);border-color:var(--ubi-navy);color:#fff}
+main{padding-block:22px 40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:13px}
+.card{background:var(--ubi-surface);border:1px solid var(--ubi-line);border-radius:12px;padding:14px 11px 12px;text-align:center;display:block}
+.card.off{display:none}
+.box{height:88px;display:flex;align-items:center;justify-content:center;margin-bottom:9px}
+.box img{max-width:100%;max-height:88px;object-fit:contain}
+.mono{width:58px;height:58px;border-radius:50%;background:var(--ubi-gray);color:var(--ubi-navy);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px}
+.nm{font-size:12.5px;font-weight:800;color:var(--ubi-navy);line-height:1.25}
+.meta{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:5px}
+.fl{width:15px;height:10px;object-fit:cover;border-radius:2px;border:1px solid var(--ubi-line);flex:0 0 auto}
+.flfb{width:15px;height:10px;border-radius:2px;border:1px solid var(--ubi-line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:900;color:var(--ubi-gray2);flex:0 0 auto}
+.rg{font-size:10.5px;color:var(--ubi-gray2);font-weight:700}
+.empty{padding:34px;text-align:center;color:var(--ubi-gray2);font-size:13px;font-weight:700}
+footer{font-size:11.5px;padding-block:16px;opacity:.75}
+footer .container{display:flex;gap:12px;flex-wrap:wrap}
+@media print{body{background:#fff;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .ctrl,.btn{display:none}.grid{grid-template-columns:repeat(5,1fr);gap:8px}
+ .card{break-inside:avoid;box-shadow:none}}
+</style></head><body>
+<header class="band band--navy"><div class="container top">
+  <span class="wm"><b>Ubi</b>cquia<sup>&reg;</sup></span>
+  <h1>Presencia municipal · LATAM</h1><span class="sp"></span>
+  <span class="pill" id="kpi"></span>
+  <button class="btn" onclick="window.print()">Imprimir / PDF</button>
+</div></header>
+<div class="ctrl"><div class="container">
+  <input id="q" type="search" placeholder="Buscar municipio, región o país…" autocomplete="off">
+  <div class="chips" id="chips"></div>
+</div></div>
+<main class="band"><div class="container">
+  <div class="grid" id="mural"></div><div class="empty" id="empty" style="display:none">Sin resultados</div>
+</div></main>
+<footer class="band band--navy"><div class="container">
+  <span id="foot"></span><span>Emblemas de sus respectivas instituciones. Este archivo no implica afiliación.</span>
+</div></footer>
+<script>
+(function(){"use strict";
+var M=[{"n":"Ciudad de México","r":"Ciudad de México","c":"México","iso":"mx","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20la%20ciudad%20de%20M%C3%A9xico.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_la_ciudad_de_M%C3%A9xico.svg"},{"n":"Oaxaca de Juárez","r":"Oaxaca","c":"México","iso":"mx","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Esc%20Municipal%20Oaxaca%20de%20Juarez.svg","src":"https://commons.wikimedia.org/wiki/File:Esc_Municipal_Oaxaca_de_Juarez.svg"},{"n":"San Salvador","r":"San Salvador","c":"El Salvador","iso":"sv","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20San%20Salvador%20(2021).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_San_Salvador_(2021).svg"},{"n":"San José","r":"San José","c":"Costa Rica","iso":"cr","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Blason%20de%20San%20Jos%C3%A9%20(Costa%20Rica).svg","src":"https://commons.wikimedia.org/wiki/File:Blason_de_San_Jos%C3%A9_(Costa_Rica).svg"},{"n":"Cartagena de Indias","r":"Bolívar","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Cartagena%20de%20Indias.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Cartagena_de_Indias.svg"},{"n":"La Dorada","r":"Caldas","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20La%20Dorada%20(Caldas).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_La_Dorada_(Caldas).svg"},{"n":"Arjona","r":"Bolívar","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Arjona%20(Bol%C3%ADvar).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Arjona_(Bol%C3%ADvar).svg"},{"n":"Alejandría","r":"Antioquia","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Alejandr%C3%ADa%20(Antioquia).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Alejandr%C3%ADa_(Antioquia).svg"},{"n":"Zipaquirá","r":"Cundinamarca","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Zipaquira.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Zipaquira.svg"},{"n":"Medellín","r":"Antioquia","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Medell%C3%ADn,%20Antioquia,%20Colombia%20(escudo).svg","src":"https://commons.wikimedia.org/wiki/File:Medell%C3%ADn%2C_Antioquia%2C_Colombia_(escudo).svg"},{"n":"Pereira","r":"Risaralda","c":"Colombia","iso":"co","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Pereira.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Pereira.svg"},{"n":"Guayaquil","r":"Guayas","c":"Ecuador","iso":"ec","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Guayaquil.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Guayaquil.svg"},{"n":"Santa Elena","r":"Cantón Santa Elena","c":"Ecuador","iso":"ec","img":"https://www.vhv.rs/dpng/d/273-2739610_escudo-del-cantn-santa-elena-hd-png-download.png","src":"https://www.gadse.gob.ec/"},{"n":"Trujillo","r":"La Libertad","c":"Perú","iso":"pe","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Trujillo%20(Per%C3%BA).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Trujillo_(Per%C3%BA).svg"},{"n":"Lima","r":"Lima Metropolitana","c":"Perú","iso":"pe","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Coat%20of%20arms%20of%20Lima.svg","src":"https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Lima.svg"},{"n":"Padre Hurtado","r":"Región Metropolitana","c":"Chile","iso":"cl","img":"https://tramites.mph.cl/img/mph-colorful.jpg","src":"https://portal.mph.cl/"},{"n":"Maipú","r":"Región Metropolitana","c":"Chile","iso":"cl","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Maip%C3%BA%20(Chile).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Maip%C3%BA_(Chile).svg"},{"n":"La Florida","r":"Región Metropolitana","c":"Chile","iso":"cl","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20La%20Florida%20(Chile).svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_La_Florida_(Chile).svg"},{"n":"Puente Alto","r":"Región Metropolitana","c":"Chile","iso":"cl","img":"https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo%20de%20Puente%20Alto.svg","src":"https://commons.wikimedia.org/wiki/File:Escudo_de_Puente_Alto.svg"},{"n":"Paysandú","r":"Departamento de Paysandú","c":"Uruguay","iso":"uy","img":"https://www.paysandu.gub.uy/wp-content/uploads/2024/09/escudo-paysandu.jpg","src":"https://www.paysandu.gub.uy/transparencia/imagen-institucional/"}];
+
+function initials(n){var S={de:1,del:1,la:1,las:1,los:1,el:1,y:1};
+  var p=n.split(/\s+/).filter(function(w){return w&&!S[w.toLowerCase()];});
+  return (p.slice(0,2).map(function(w){return w[0];}).join("")||"?").toUpperCase();}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function groupByCountry(list){var o=[],ix={};list.forEach(function(m){
+  if(ix[m.c]===undefined){ix[m.c]=o.length;o.push({c:m.c,iso:m.iso,items:[]});}
+  o[ix[m.c]].items.push(m);});return o;}
+function stats(list){return {mun:list.length,pais:groupByCountry(list).length};}
+function flagURL(iso){return "https://flagcdn.com/w40/"+iso+".png";}
+function imgTag(m){return '<img loading="lazy" alt="Emblema de '+esc(m.n)+'" src="'+esc(m.img)+'" data-mono="'+esc(initials(m.n))+'">';}
+function flagTag(g){return '<img class="fl" alt="Bandera de '+esc(g.c)+'" src="'+flagURL(g.iso)+'" data-iso="'+esc(g.iso)+'">';}
+function attachFallback(root){root.addEventListener("error",function(e){
+  var t=e.target;if(!t||t.tagName!=="IMG"||!t.parentNode)return;
+  var d=document.createElement("div");
+  if(t.hasAttribute("data-iso")){d.className="flfb";d.textContent=t.getAttribute("data-iso").toUpperCase();}
+  else if(t.hasAttribute("data-mono")){d.className="mono";d.textContent=t.getAttribute("data-mono");}
+  else return;
+  t.parentNode.replaceChild(d,t);},true);}
+
+var G=groupByCountry(M),S=stats(M),cur="all";
+function flagMini(m){return '<img class="fl" alt="'+esc(m.c)+'" src="'+flagURL(m.iso)+'" data-iso="'+esc(m.iso)+'">';}
+document.getElementById("kpi").textContent=S.mun+" municipios · "+S.pais+" países";
+document.getElementById("foot").innerHTML="<b>"+S.mun+"</b> municipios &middot; <b>"+S.pais+"</b> países";
+var ch='<button class="chip on" data-f="all">Todos</button>';
+G.forEach(function(g){ch+='<button class="chip" data-f="'+esc(g.c)+'">'+flagTag(g)+esc(g.c)+'</button>';});
+document.getElementById("chips").innerHTML=ch;
+var html="";
+M.forEach(function(m){
+  html+='<div class="card" data-c="'+esc(m.c)+'" data-s="'+esc((m.n+" "+m.r+" "+m.c).toLowerCase())+'">'+
+    '<div class="box">'+imgTag(m)+'</div><div class="nm">'+esc(m.n)+'</div>'+
+    '<div class="meta">'+flagMini(m)+'<span class="rg">'+esc(m.r)+'</span></div></div>';
+});
+attachFallback(document.body);
+document.getElementById("mural").innerHTML=html;
+function apply(){
+  var q=document.getElementById("q").value.trim().toLowerCase(),vis=0;
+  Array.prototype.forEach.call(document.querySelectorAll(".card"),function(c){
+    var ok=(cur==="all"||c.getAttribute("data-c")===cur)&&(!q||c.getAttribute("data-s").indexOf(q)>=0);
+    c.classList.toggle("off",!ok);if(ok)vis++;});
+  document.getElementById("empty").style.display=vis?"none":"block";
+  document.getElementById("kpi").textContent=(vis===S.mun?S.mun+" municipios · "+S.pais+" países":vis+" de "+S.mun+" municipios");
+}
+document.getElementById("chips").addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest(".chip");if(!b)return;
+  cur=b.getAttribute("data-f");
+  Array.prototype.forEach.call(this.querySelectorAll(".chip"),function(x){x.classList.toggle("on",x===b);});
+  apply();});
+document.getElementById("q").addEventListener("input",apply);
+window.__A__={M:M,G:G,S:S,apply:apply};
+})();
+</script></body></html>
