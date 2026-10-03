@@ -20,7 +20,7 @@ datos_fuente: export UbicquiaMaster 2026-07-06 (16 países) + El Salvador agrega
               (presencia sin cifras) · 54 puntos-región · ninguna cifra se muestra en pantalla
 no_tocar    : agregado DATA (regenerar solo desde nuevo export) · motor del mapa
 pendientes  : reponer QR del kiosco con el dominio definitivo; probar kiosco en el stand
-intro       : v10 · animación Fourier del wordmark "ubicquia" (epiciclos, un contorno por
+intro       : v10 · animación Fourier del wordmark "Ubicquia" (epiciclos, un contorno por
               letra, huecos por evenodd) sobre overlay; al terminar revela el tour del mapa.
               Se salta en kiosk y en reduced-motion. Motor: labelAndTrace + dft.
 flujo       : /  (esta intro)  →  /quienes-somos/  (Ubicquia LATAM)
@@ -39,7 +39,7 @@ flujo       : /  (esta intro)  →  /quienes-somos/  (Ubicquia LATAM)
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ubicquia® — Red desplegada en Latinoamérica</title>
+<title>Ubicquia® — Red desplegada en Latinoamérica</title>
 <meta name="description" content="Recorrido por la presencia de Ubicquia en Latinoamérica: la red desplegada en 16 países.">
 <meta property="og:title" content="Ubicquia — Red desplegada en Latinoamérica">
 <meta property="og:description" content="Un recorrido por la región, país por país. Después, conoce al equipo LATAM.">
@@ -125,7 +125,7 @@ body{font-family:'Lato',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#
   background:rgba(255,255,255,.96);border-radius:14px;padding:16px 22px;
   box-shadow:0 0 30px rgba(34,176,225,.45),0 6px 22px rgba(0,0,0,.4)}
 .kioskmark .wm{font-size:clamp(20px,2.6vw,27px);font-weight:900;letter-spacing:-.02em;color:var(--ubi-navy);
-  text-transform:lowercase;line-height:1}
+  line-height:1}
 .kioskmark .wm b{color:var(--ubi-blue);font-weight:900}
 .kioskmark .wm sup{font-size:9px;vertical-align:super;color:var(--ubi-gray2)}
 .kioskmark span.site{font-size:12px;font-weight:700;color:#0B1226;letter-spacing:.06em}
@@ -141,7 +141,7 @@ body.kiosk .endwrap{display:none !important}
 <canvas id="stage"></canvas>
 
 <div class="top">
-  <div class="logo"><b>ubi</b>cquia<sup>®</sup></div>
+  <div class="logo"><b>Ubi</b>cquia<sup>®</sup></div>
   <a class="cta" href="/quienes-somos/">Quiénes somos
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h12m0 0-5-5m5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
@@ -173,7 +173,7 @@ body.kiosk .endwrap{display:none !important}
 </div>
 
 <a class="kioskmark" href="/quienes-somos/" aria-label="Ubicquia">
-  <span class="wm"><b>ubi</b>cquia<sup>®</sup></span>
+  <span class="wm"><b>Ubi</b>cquia<sup>®</sup></span>
   <span class="site">ubicquia.com</span>
 </a>
 
@@ -456,7 +456,7 @@ window.__bootTour=function(){ if(window.__tourStarted) return; window.__tourStar
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot(); };
 </script>
 <script>
-/* FOURIER-INTRO — apertura: dibuja el wordmark "ubicquia" con epiciclos y revela el tour */
+/* FOURIER-INTRO — apertura: dibuja el wordmark "Ubicquia" con epiciclos y revela el tour */
 (function(){
 "use strict";
 
@@ -467,7 +467,7 @@ function renderTextGrid(text){
   const font='900 200px Lato, "Arial Black", system-ui, sans-serif';
   g.font=font;
   const W=Math.ceil(g.measureText(text).width)+pad*2;
-  const splitX=pad+g.measureText("ubi").width;
+  const splitX=pad+g.measureText("Ubi").width;
   cv.width=W; cv.height=H; g=cv.getContext("2d");
   g.font=font; g.textBaseline="alphabetic"; g.fillStyle="#fff";
   g.fillText(text, pad, H-26);
@@ -549,7 +549,7 @@ function runIntro(){
 
   let W=0,H=0,DPR=1,scale=1,cx0=0,cy0=0,bbox=null, LOOPS=[];
   try{
-    const {grid,w,h,splitX}=renderTextGrid("ubicquia");
+    const {grid,w,h,splitX}=renderTextGrid("Ubicquia");
     labelAndTrace(grid,w,h).forEach(L=>{ const col=colorFor(L.cx,splitX)==="blue"?BLUE:WHITE;
       L.loops.forEach(loop=>{ const per=perim(loop), n=Math.max(28,Math.min(360,Math.round(per/2)));
         const pts=smoothLoop(resampleLoop(loop,n),2); LOOPS.push({raw:pts.map(p=>({re:p.x,im:p.y})), col, trail:[]}); }); });
